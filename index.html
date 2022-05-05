@@ -1,0 +1,156 @@
+<h1 id="linux-desktop-system-setup-on-ec2">Linux Desktop System Setup on EC2</h1>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Tux.png" alt="Labs" /></p>
+<h2 id="lxde-and-xrdp">LXDE and XRDP</h2>
+<p>Transform your ec2 in a rdp reachable Desktop environment. Sometimes it is usefull to dedicate a workstation to use cases. Here we simply instanciate an instance, install LXDE and XRDP.</p>
+<p>LXDE</p>
+<ul>
+<li>Specially designed for cloud-based servers.</li>
+<li>Lightweight GUI for Linux</li>
+<li>Better interface</li>
+<li>Multi-language support</li>
+<li>Supports standard keyboard shortcuts</li>
+<li>Fast performance</li>
+</ul>
+<h2 id="command">Command</h2>
+<pre><code class="bash language-bash">sudo apt-get update -y
+sudo apt-get install lxde -y
+sudo apt-get install xrdp -y</code></pre>
+<h2 id="enforce-your-user-credentials">Enforce your user credentials</h2>
+<pre><code class="bash language-bash">sudo passwd ubuntu</code></pre>
+<h2 id="keep-control-on-your-cloud-resources">Keep control on your cloud resources</h2>
+<table>
+<thead>
+<tr>
+<th id="![labs](https://learn.hashicorp.com/_next/static/images/color-c0fe8380afabc1c58f5601c1662a2e2d.svg)" style="text-align:left;"><img src="https://learn.hashicorp.com/_next/static/images/color-c0fe8380afabc1c58f5601c1662a2e2d.svg" alt="Labs" /></th>
+<th id="this_demo_shows_you_how_to_automate_your_architecture_implementation_in_a_**cloud_devops**_approach_with_[terraform](https://www.terraform.io/)." style="text-align:left;">This demo shows you how to automate your architecture implementation in a <strong>Cloud DevOps</strong> approach with <a href="https://www.terraform.io/">Terraform</a>.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;"><strong>terraform</strong></td>
+<td style="text-align:left;">Terraform &gt;= 1.1.9 (an alias tf is create for terraform cli)</td>
+</tr>
+<tr>
+<td style="text-align:left;"><strong>aws</strong></td>
+<td style="text-align:left;">aws cli v2 (WARNING : you are responsible of your access key, don't forget to deactivate or suppress it in your aws account !)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="first-check">First check</h2>
+<p>Please check that everything is alright. Open a terminal in your sandbox and test environment</p>
+<h3 id="open-a-terminal-and-check-terraform-cli">Open a terminal and check terraform cli</h3>
+<pre><code class="bash language-bash">sandbox@sse-sandbox-457lgm:/sandbox$ terraform version
+Terraform v1.1.9
+on linux_amd64</code></pre>
+<h3 id="check-aws-cli">Check aws cli</h3>
+<pre><code class="bash language-bash">sandbox@sse-sandbox-457lgm:/sandbox$ aws --version
+aws-cli/2.6.1 Python/3.9.11 Linux/5.13.0-40-generic exe/x86_64.debian.10 prompt/off</code></pre>
+<p>You need to configure your AWS access key. <strong>Don't forget to delete or deactivate your access key in IAM, once you have finished this demo !</strong></p>
+<pre><code class="bash language-bash">sandbox@sse-sandbox-457lgm:/sandbox$ aws configure
+AWS Access Key ID [None]: XXXXXXXXXXXXXX
+AWS Secret Access Key [None]: XXXxxxxxxxxxxxxxxxxxXXXxxxxxxxxxXXxxxxxxx
+Default region name [None]: eu-north-1
+Default output format [None]:</code></pre>
+<h3 id="doc-as-code">Doc as code</h3>
+<p>Generate html page from Readme.md to show in integrated browser (CodeSandbox)</p>
+<pre><code class="bash language-bash">sandbox@sse-sandbox-457lgm:/sandbox$ node md2html.js</code></pre>
+<h2 id="terraform-backend">Terraform backend</h2>
+<p>All terraform state files are stored and shared in a dedicated S3 bucket. Create if needed your own bucket.</p>
+<pre><code class="bash language-bash">aws s3api create-bucket --bucket a-tfstate-rch --create-bucket-configuration LocationConstraint=eu-north-1 --region eu-north-1
+aws s3api put-bucket-tagging --bucket a-tfstate-rch --tagging 'TagSet=[{Key=Owner,Value=raphael.chir@couchbase.com},{Key=Name,Value=terraform state set}]'</code></pre>
+<p>Refer your bucket in your terraform backend configuration.<br />
+<strong>Specify a key for your project !</strong></p>
+<pre><code class="bash language-bash">terraform {
+  backend "s3" {
+    region  = "eu-north-1"
+    key     = "myproject-tfstate"
+    bucket  = "a-tfstate-rch"
+  }
+}</code></pre>
+<h2 id="tag-tag-tag-">Tag tag tag, ..</h2>
+<p>More than a best practice, it is essential for inventory resources, cost explorer, etc .. Open terraform.tfvars and update these values</p>
+<pre><code class="bash language-bash">resource_tags = {
+  project     = "myproject"
+  environment = "staging-rch"
+  owner       = "raphael.chir@couchbase.com"
+}</code></pre>
+<h2 id="ssh-keys">SSH Keys</h2>
+<h3 id="generate">Generate</h3>
+<p>We need to generate key pair in order to ssh into instances. Create a .ssh folder in tf-playground.<br />
+<a href="https://www.ssh.com/academy/ssh/keygen#creating-an-ssh-key-pair-for-user-authentication">SSH Academy</a></p>
+<p>Open a terminal and paste this default command</p>
+<pre><code class="bash language-bash">ssh-keygen -q -t rsa -b 4096 -f /sandbox/tf-playground/.ssh/zkey -N ''</code></pre>
+<p>Change if needed ssh_keys_path variable in terraform.tvars  <br />
+Run this command, if necessary, to ensure your key is not publicly viewable.</p>
+<pre><code class="bash language-bash">chmod 400 zkey</code></pre>
+<h3 id="choosing-an-algorithm-and-key-size">Choosing an Algorithm and Key Size</h3>
+<p>SSH supports several public key algorithms for authentication keys. These include:</p>
+<p><strong>rsa</strong> - an old algorithm based on the difficulty of factoring large numbers. A key size of at least 2048 bits is recommended for RSA; 4096 bits is better. RSA is getting old and significant advances are being made in factoring. Choosing a different algorithm may be advisable. It is quite possible the RSA algorithm will become practically breakable in the foreseeable future. All SSH clients support this algorithm.</p>
+<p><strong>dsa</strong> - an old US government Digital Signature Algorithm. It is based on the difficulty of computing discrete logarithms. A key size of 1024 would normally be used with it. DSA in its original form is no longer recommended.</p>
+<p><strong>ecdsa</strong> - a new Digital Signature Algorithm standarized by the US government, using elliptic curves. This is probably a good algorithm for current applications. Only three key sizes are supported: 256, 384, and 521 (sic!) bits. We would recommend always using it with 521 bits, since the keys are still small and probably more secure than the smaller keys (even though they should be safe as well). Most SSH clients now support this algorithm.</p>
+<p><strong>ed25519</strong> - this is a new algorithm added in OpenSSH. Support for it in clients is not yet universal. Thus its use in general purpose applications may not yet be advisable.</p>
+<p>The algorithm is selected using the -t option and key size using the -b option. The following commands illustrate:</p>
+<pre><code class="bash language-bash">ssh-keygen -t rsa -b 4096
+ssh-keygen -t dsa
+ssh-keygen -t ecdsa -b 521
+ssh-keygen -t ed25519</code></pre>
+<h2 id="how-to-choose-your-os-ami">How to choose your OS AMI</h2>
+<h3 id="from-aws-console">From AWS console</h3>
+<p>You can just copy from aws console the <strong>ami-id</strong> needed.  <br />
+e.g : '<em>Canonical, Ubuntu, 22.04 LTS, amd64 jammy image build on 2022-04-20</em>' is <strong>ami-01ded35841bc93d7f</strong></p>
+<h3 id="advanced-search">Advanced search</h3>
+<p>For specific search based on filters you can also use this command.<br />
+Based on this metadata structure below or see<br />
+<a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/describe-images.html">aws ec2 describe-images details</a>  <br />
+<a href="https://docs.aws.amazon.com/sdkfornet1/latest/apidocs/html/P_Amazon_EC2_Model_DescribeImagesRequest_Filter.htm">Another link</a></p>
+<pre><code class="bash language-bash">[
+    {
+        "Architecture": "x86_64",
+        "CreationDate": "2022-04-21T14:55:48.000Z",
+        "ImageId": "ami-01ded35841bc93d7f",
+        "ImageLocation": "099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20220420",
+        "ImageType": "machine",
+        "Public": true,
+        "OwnerId": "099720109477",
+        "PlatformDetails": "Linux/UNIX",
+        "UsageOperation": "RunInstances",
+        "State": "available",
+        "BlockDeviceMappings": [
+            {
+                "DeviceName": "/dev/sda1",
+                "Ebs": {
+                    "DeleteOnTermination": true,
+                    "SnapshotId": "snap-0bc2203755d33f5f6",
+                    "VolumeSize": 8,
+                    "VolumeType": "gp2",
+                    "Encrypted": false
+                }
+            },
+            {
+                "DeviceName": "/dev/sdc",
+                "VirtualName": "ephemeral1"
+            },
+            {
+                "DeviceName": "/dev/sdb",
+                "VirtualName": "ephemeral0"
+            }
+        ],
+        "Description": "Canonical, Ubuntu, 22.04 LTS, amd64 jammy image build on 2022-04-20",
+        "EnaSupport": true,
+        "Hypervisor": "xen",
+        "Name": "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20220420",
+        "RootDeviceName": "/dev/sda1",
+        "RootDeviceType": "ebs",
+        "SriovNetSupport": "simple",
+        "VirtualizationType": "hvm",
+        "DeprecationTime": "2024-04-21T14:55:48.000Z"
+    }
+]</code></pre>
+<p>You can find specific ami with this command</p>
+<pre><code class="bash language-bash">aws ec2 describe-images --region eu-north-1 --query "Images[*].[Description,ImageId]" --filters"Name=name,Values=ubuntu*" "Name=creation-date,Values=2022*" "Name=architecture,Values=x86_64" "Name=root-device-type,Values=ebs" "Name=block-device-mapping.volume-type,Values=gp2" "Name=image-type,Values=machine" "Name=state,Values=available" "Name=description,Values=*Ubuntu*22.04*"</code></pre>
+<p>Or write it into a file</p>
+<pre><code class="bash language-bash">echo $(aws ec2 describe-images --region eu-north-1 --query "Images[*].[Description,ImageId]" --filters "Name=name,Values=ubuntu*" "Name=creation-date,Values=2022*" "Name=architecture,Values=x86_64" "Name=root-device-type,Values=ebs" "Name=block-device-mapping.volume-type,Values=gp2" "Name=image-type,Values=machine" "Name=state,Values=available" "Name=description,Values=*Ubuntu*22.04*")&gt;ami.json</code></pre>
+<p>Use list to see all namespaces</p>
+<pre><code class="bash language-bash">aws ssm get-parameters-by-path \
+--path /aws/service/ami-amazon-linux-latest \
+--query 'Parameters[].Name' --region eu-north-1</code></pre>

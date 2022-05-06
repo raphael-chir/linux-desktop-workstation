@@ -43,8 +43,8 @@ module "node01" {
   resource_tags          = var.resource_tags
   base_name              = "ubuntu-18-04"
   instance_ami_id        = "ami-022b0631072a1aefe"
-  instance_type          = "t3.medium"
-  user_data_script_path  = "scripts/init-instance.sh"
+  instance_type          = "t3.xlarge"
+  user_data_script_path  = "scripts/init-talend.sh"
   user_data_args         = {services="data"}
   ssh_public_key_name    = aws_key_pair.this.key_name
   vpc_security_group_ids = module.network.vpc_security_group_ids

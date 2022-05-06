@@ -1,7 +1,16 @@
 <h1 id="linux-desktop-system-setup-on-ec2">Linux Desktop System Setup on EC2</h1>
 <p><img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Tux.png" alt="Labs" /></p>
+<h2 id="compute">Compute</h2>
+<p>Choose the best compute for your workstation usage : <a href="https://aws.amazon.com/fr/ec2/instance-types/">read this page</a>.<br />
+Possible option (Processeur Intel Xeon Platinum fmax=3,1 GHz) :</p>
+<ul>
+<li>t3.large (2vCPU,8G)</li>
+<li>t3.xlarge (4vCPU, 16G)</li>
+</ul>
+<p>You can list and filter instance type to find out the appropriate solution eg :</p>
+<pre><code class="bash language-bash">aws ec2 describe-instance-types --filters Name=hibernation-supported,Values=true --query InstanceTypes[].InstanceType --region eu-north-1</code></pre>
 <h2 id="lxde-and-xrdp">LXDE and XRDP</h2>
-<p>Transform your ec2 in a rdp reachable Desktop environment. Sometimes it is usefull to dedicate a workstation to use cases. Here we simply instanciate an instance, install LXDE and XRDP.</p>
+<p>Transform your ec2 in a rdp reachable Desktop environment. Sometimes it is usefull to dedicate a workstation to use cases. Here we simply instanciate an instance, install LXDE and XRDP…</p>
 <p>LXDE</p>
 <ul>
 <li>Specially designed for cloud-based servers.</li>
@@ -16,7 +25,17 @@
 sudo apt-get install lxde -y
 sudo apt-get install xrdp -y</code></pre>
 <h2 id="enforce-your-user-credentials">Enforce your user credentials</h2>
+<p>Automate the creation of a specific account or manually modify ec2 ubuntu user :</p>
 <pre><code class="bash language-bash">sudo passwd ubuntu</code></pre>
+<h2 id="allow-inbound-rdp-connections-tcp3389">Allow inbound RDP connections (TCP/3389)</h2>
+<p>Allow inbound RDP connections (TCP/3389) for the security group associated in AWS to the instance. On our example the security group associated to the instance is launch-wizard-3 so we will add a rule to allow TCP/3389 from our IP address only.</p>
+<h2 id="challenge-1--talend-open-studio-installation">Challenge #1 : Talend Open Studio installation</h2>
+<p>Follow installation guide : <a href="https://help.talend.com/r/fr-FR/8.0/studio-getting-started-guide-open-studio-for-data-integration/introduction">here</a></p>
+<p>The package installer is stored in a s3 Bucket. If you don't want to use aws console, use cli :</p>
+<pre><code class="bash language-bash">aws s3api put-object --bucket a-materials-rch --key dir-1/big-video-file.mp4 --body e:\media\videos\f-sharp-3-data-services.mp4</code></pre>
+<p>URI :</p>
+<pre><code>https://a-materials-rch.s3.eu-north-1.amazonaws.com/install-packages/TOS_DI-20211109_1610-V8.0.1.zip (No access because private)
+s3://a-materials-rch/install-packages/TOS_DI-20211109_1610-V8.0.1.zip</code></pre>
 <h2 id="keep-control-on-your-cloud-resources">Keep control on your cloud resources</h2>
 <table>
 <thead>

@@ -2,9 +2,23 @@
 
 ![Labs](https://upload.wikimedia.org/wikipedia/commons/a/af/Tux.png)
 
+## Compute
+
+Choose the best compute for your workstation usage : [read this page](https://aws.amazon.com/fr/ec2/instance-types/).
+Possible option (Processeur Intel Xeon Platinum fmax=3,1 GHz) :
+
+- t3.large (2vCPU,8G)
+- t3.xlarge (4vCPU, 16G)
+
+You can list and filter instance type to find out the appropriate solution eg :
+
+```bash
+aws ec2 describe-instance-types --filters Name=hibernation-supported,Values=true --query InstanceTypes[].InstanceType --region eu-north-1
+```
+
 ## LXDE and XRDP
 
-Transform your ec2 in a rdp reachable Desktop environment. Sometimes it is usefull to dedicate a workstation to use cases. Here we simply instanciate an instance, install LXDE and XRDP.
+Transform your ec2 in a rdp reachable Desktop environment. Sometimes it is usefull to dedicate a workstation to use cases. Here we simply instanciate an instance, install LXDE and XRDP...
 
 LXDE
 
@@ -17,16 +31,43 @@ LXDE
 
 ## Command
 
+We use user data to script installation of graphical layer.
+
 ```bash
 sudo apt-get update -y
 sudo apt-get install lxde -y
 sudo apt-get install xrdp -y
 ```
 
+You can setup a complete environment such as the example provided : init-talend.sh
+
 ## Enforce your user credentials
+
+Automate the creation of a specific account or manually modify ec2 ubuntu user :
 
 ```bash
 sudo passwd ubuntu
+```
+
+## Allow inbound RDP connections (TCP/3389)
+
+Allow inbound RDP connections (TCP/3389) for the security group associated in AWS to the instance. On our example the security group associated to the instance is launch-wizard-3 so we will add a rule to allow TCP/3389 from our IP address only.
+
+## Challenge #1 : Talend Open Studio installation
+
+Follow installation guide : [here](https://help.talend.com/r/fr-FR/8.0/studio-getting-started-guide-open-studio-for-data-integration/introduction)
+
+The package installer is stored in a s3 Bucket. If you don't want to use aws console, use cli :
+
+```bash
+aws s3api put-object --bucket a-materials-rch --key dir-1/big-video-file.mp4 --body e:\media\videos\f-sharp-3-data-services.mp4
+```
+
+URI :
+
+```
+https://a-materials-rch.s3.eu-north-1.amazonaws.com/install-packages/TOS_DI-20211109_1610-V8.0.1.zip (No access because private)
+s3://a-materials-rch/install-packages/TOS_DI-20211109_1610-V8.0.1.zip
 ```
 
 ## Keep control on your cloud resources

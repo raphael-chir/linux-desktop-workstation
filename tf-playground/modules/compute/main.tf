@@ -7,6 +7,9 @@
 resource "aws_instance" "this" {
   ami                         = var.instance_ami_id
   instance_type               = var.instance_type
+  root_block_device {
+    volume_size = var.root_volume_size
+  }
   key_name                    = var.ssh_public_key_name
   associate_public_ip_address = true
   vpc_security_group_ids      = var.vpc_security_group_ids

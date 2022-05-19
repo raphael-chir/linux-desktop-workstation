@@ -4,11 +4,12 @@
 
 ## Compute
 
-Choose the best compute for your workstation usage : [read this page](https://aws.amazon.com/fr/ec2/instance-types/).
+Choose the best compute for your workstation usage : [read this page](https://aws.amazon.com/fr/ec2/instance-types/).  
+Take a look on pricing : [how does it cost ?](https://aws.amazon.com/fr/ec2/pricing/on-demand/)
 Possible option (Processeur Intel Xeon Platinum fmax=3,1 GHz) :
 
-- t3.large (2vCPU,8G)
 - t3.xlarge (4vCPU, 16G)
+- t3.xlarge (8vCPU, 32G)
 
 You can list and filter instance type to find out the appropriate solution eg :
 

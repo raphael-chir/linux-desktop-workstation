@@ -27,6 +27,11 @@ variable "instance_type" {
   type        = string
 }
 
+variable "root_volume_size" {
+  description = "Instance root volume size"
+  type        = number
+}
+
 variable "user_data_script_path" {
   description = "user data script path"
   type        = string

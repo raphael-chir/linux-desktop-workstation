@@ -1,0 +1,2 @@
+node01_public_dns = "http://ec2-35-180-36-228.eu-west-3.compute.amazonaws.com:8091"
+node01_public_ip = "ssh -i .ssh/id_rsa ec2-user@35.180.36.228"

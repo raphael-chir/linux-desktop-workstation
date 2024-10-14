@@ -5,11 +5,8 @@
 
 # Create ec2 instance
 resource "aws_instance" "this" {
-  ami                         = var.instance_ami_id
+  ami                         = var.ami_id
   instance_type               = var.instance_type
-  root_block_device {
-    volume_size = var.root_volume_size
-  }
   key_name                    = var.ssh_public_key_name
   associate_public_ip_address = true
   vpc_security_group_ids      = var.vpc_security_group_ids
@@ -20,5 +17,6 @@ resource "aws_instance" "this" {
     Project     = var.resource_tags["project"]
     Owner       = var.resource_tags["owner"]
     Environment = var.resource_tags["environment"]
+    user        = var.resource_tags["user"]
   }
 }

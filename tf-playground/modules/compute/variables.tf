@@ -12,7 +12,7 @@ variable "base_name" {
   type        = string
 }
 
-variable "instance_ami_id" {
+variable "ami_id" {
   description = "Instance AMI id"
   type        = string
 }
@@ -25,11 +25,6 @@ variable "ssh_public_key_name" {
 variable "instance_type" {
   description = "Instance compute type"
   type        = string
-}
-
-variable "root_volume_size" {
-  description = "Instance root volume size"
-  type        = number
 }
 
 variable "user_data_script_path" {
